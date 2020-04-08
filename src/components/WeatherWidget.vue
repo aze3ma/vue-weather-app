@@ -21,30 +21,57 @@
         </b-col>
       </b-row>
     </b-card>
+    <b-row>
+      <b-col cols="12" md="6">
+        <h4 class="my-4">Daily</h4>
+        <b-card class="secondry-card">
+          <b-row
+            align-v="center"
+            align-h="center"
+            v-for="(day, idx) in daily"
+            :key="day.time"
+            :class="{ 'mt-3': idx > 0 }"
+          >
+            <b-col cols="3">
+              <div class="font-weight-bold small">{{ toDayOfWeek(day.time) }}</div>
+            </b-col>
+            <b-col cols="6">
+              <b-row class="small" align-v="center" align-h="center">
+                <skycon :condition="day.icon" :width="24" :height="24" />
 
-    <b-card class="secondry-card">
-      <b-row
-        align-v="center"
-        align-h="center"
-        v-for="(day, idx) in daily"
-        :key="day.time"
-        :class="{ 'mt-3': idx > 0 }"
-      >
-        <b-col cols="3">
-          <div class="font-weight-bold small">{{ toDayOfWeek(day.time) }}</div>
-        </b-col>
-        <b-col cols="6">
-          <b-row class="small" align-v="center" align-h="center">
-            <skycon :condition="day.icon" :width="24" :height="24" />
-            <div class="ml-1">{{ day.summary }}</div>
+                <div class="ml-1">{{ day.summary }}</div>
+              </b-row>
+            </b-col>
+            <b-col class="text-right small" cols="3">
+              <div>{{ Math.round(day.temperatureHigh) }} ℃</div>
+              <div>{{ Math.round(day.temperatureLow) }} ℃</div>
+            </b-col>
           </b-row>
-        </b-col>
-        <b-col class="text-right small" cols="3">
-          <div>{{ Math.round(day.temperatureHigh) }} ℃</div>
-          <div>{{ Math.round(day.temperatureLow) }} ℃</div>
-        </b-col>
-      </b-row>
-    </b-card>
+        </b-card>
+      </b-col>
+      <b-col cols="12" md="6">
+        <h4 v-b-toggle.collapse-1 variant="dark" class="my-4">
+          Extras
+        </h4>
+
+        <b-collapse id="collapse-1" class="my-2" visible>
+          <b-card class="secondry-card">
+            <b-row align-v="center" align-h="between">
+              <b-col cols="4">
+                <div class="font-weight-bold small">Wind Speed:</div>
+                <div class="font-weight-bold small">Humidity:</div>
+                <div class="font-weight-bold small">Pressure:</div>
+              </b-col>
+              <b-col cols="4">
+                <div class="text-right small">{{ Math.round(currentTemperature.windSpeed) }}</div>
+                <div class="text-right small">{{ Math.round(currentTemperature.humidity) }}</div>
+                <div class="text-right small">{{ Math.round(currentTemperature.pressure) }}</div>
+              </b-col>
+            </b-row>
+          </b-card>
+        </b-collapse>
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
@@ -63,6 +90,9 @@ export default {
         feels: '',
         summary: '',
         icon: '',
+        windSpeed: '',
+        humidity: '',
+        pressure: '',
       },
       location: {
         name: 'New York, USA',
@@ -108,11 +138,13 @@ export default {
   methods: {
     loadWeather() {
       API.getForecast(this.location.lat, this.location.lng).then(result => {
-        console.log(result);
         this.currentTemperature = {
           actual: Math.round(result.currently.temperature),
           feels: Math.round(result.currently.apparentTemperature),
           summary: result.currently.summary,
+          windSpeed: result.currently.windSpeed,
+          humidity: result.currently.humidity,
+          pressure: result.currently.pressure,
           icon: toKebabCase(result.currently.icon),
         };
         this.daily = result.daily.data;
@@ -135,16 +167,9 @@ export default {
 .card.main-card {
   background-color: #1a202c;
   color: #ffffff;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
 }
 .card.secondry-card {
   background-color: #2d3748;
   color: #edf2f7;
-  border-radius: 0;
-  &:last-of-type {
-    border-bottom-right-radius: 0.25rem;
-    border-bottom-left-radius: 0.25rem;
-  }
 }
 </style>
